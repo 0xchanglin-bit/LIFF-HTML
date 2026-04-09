@@ -1,76 +1,672 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <title>找師傅</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  />
+  <title>找師傅篩選器</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #6d8f63;
+      --primary-dark: #5e7d55;
+      --primary-soft: #eef4ec;
+      --danger: #c24141;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+        "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02)),
+        var(--bg);
+      padding: 0;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 560px;
+      min-height: 100vh;
+      background: var(--card);
+      border-radius: 0;
+      box-shadow: none;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (min-width: 640px) {
+      .page {
+        padding: 24px;
+      }
+
+      .sheet {
+        min-height: auto;
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+    }
+
+    .sheet-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+      padding: 18px 20px 14px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title-wrap {
+      flex: 1;
+      text-align: center;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 22px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.98);
+    }
+
+    .sheet-body {
+      padding: 18px 18px 130px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f7f7f8;
+      border: 1px solid #f0f1f3;
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .search-icon {
+      font-size: 20px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .search-box input::placeholder {
+      color: #9ca3af;
+    }
+
+    .field-group {
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+      padding-bottom: 16px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #20242a;
+    }
+
+    .required {
+      color: var(--danger);
+      font-weight: 800;
+    }
+
+    .select-wrap,
+    .textarea-wrap {
+      position: relative;
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+
+    select {
+      height: 54px;
+      padding: 0 44px 0 16px;
+      cursor: pointer;
+    }
+
+    textarea {
+      min-height: 110px;
+      padding: 14px 16px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    select:focus,
+    textarea:focus,
+    .search-box:focus-within {
+      border-color: rgba(109, 143, 99, 0.35);
+      box-shadow: 0 0 0 4px rgba(109, 143, 99, 0.12);
+    }
+
+    .search-box:focus-within {
+      background: #fff;
+    }
+
+    .chevron {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #4b5563;
+      font-size: 16px;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(229, 231, 235, 0.85);
+    }
+
+    .bottom-inner {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn {
+      height: 56px;
+      border-radius: 18px;
+      font-size: 18px;
+      font-weight: 800;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(109, 143, 99, 0.28);
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: translateY(1px);
+    }
+
+    .loading {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: rgba(17, 24, 39, 0.34);
+      backdrop-filter: blur(3px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .loading.show {
+      display: flex;
+    }
+
+    .loading-card {
+      width: 100%;
+      max-width: 300px;
+      background: #fff;
+      border-radius: 22px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 14px;
+      border-radius: 999px;
+      border: 4px solid #e5e7eb;
+      border-top-color: var(--primary);
+      animation: spin 0.9s linear infinite;
+    }
+
+    .loading-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 110px;
+      transform: translateX(-50%) translateY(12px);
+      width: calc(100% - 32px);
+      max-width: 420px;
+      background: rgba(17, 24, 39, 0.92);
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      z-index: 80;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
+<body>
+  <div class="page">
+    <div class="sheet">
+      <div class="sheet-header">
+        <div class="header-top">
+          <button class="icon-btn" type="button" id="closeBtn" aria-label="關閉">✕</button>
+          <div class="title-wrap">
+            <h1 class="title">篩選條件</h1>
+            <div class="subtitle">水電幫幫｜找師傅篩選器</div>
+          </div>
+          <div style="width:42px;height:42px;"></div>
+        </div>
+      </div>
 
-<body style="font-family:sans-serif; padding:20px">
+      <div class="sheet-body">
+        <div class="search-box">
+          <div class="search-icon">⌕</div>
+          <input
+            id="keyword"
+            type="text"
+            placeholder="請輸入需求關鍵字，例如：熱水忽冷忽熱、漏水、換馬桶"
+          />
+        </div>
 
-  <h2>找師傅</h2>
+        <div class="field-group">
+          <div class="field-label">縣市 <span class="required">*</span></div>
+          <div class="select-wrap">
+            <select id="city"></select>
+            <div class="chevron">▾</div>
+          </div>
+        </div>
 
-  <label>縣市</label><br>
-  <select id="city">
-    <option value="台北市">台北市</option>
-    <option value="台中市">台中市</option>
-  </select>
+        <div class="field-group">
+          <div class="field-label">區域 <span class="required">*</span></div>
+          <div class="select-wrap">
+            <select id="district" disabled></select>
+            <div class="chevron">▾</div>
+          </div>
+          <div class="hint">請先選擇縣市，系統會自動帶出對應區、鄉、鎮、市。</div>
+        </div>
 
-  <br><br>
+        <div class="field-group">
+          <div class="field-label">服務內容 <span class="required">*</span></div>
+          <div class="select-wrap">
+            <select id="service"></select>
+            <div class="chevron">▾</div>
+          </div>
+        </div>
 
-  <label>區域</label><br>
-  <input id="district" placeholder="例如：大同區" />
+        <div class="field-group" style="border-bottom:0;padding-bottom:0;">
+          <div class="field-label">補充需求</div>
+          <div class="textarea-wrap">
+            <textarea
+              id="description"
+              placeholder="可補充現場狀況、需求內容或希望協助的項目，例如：熱水器忽冷忽熱，想找人到府檢查。"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <br><br>
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <button class="btn btn-secondary" type="button" id="resetBtn">清除所有條件</button>
+      <button class="btn btn-primary" type="button" id="submitBtn">開始搜尋</button>
+    </div>
+  </div>
 
-  <label>服務</label><br>
-  <select id="service">
-    <option value="水電">水電</option>
-    <option value="熱水器">熱水器</option>
-  </select>
+  <div class="loading" id="loading">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div class="loading-title">正在搜尋適合的師傅</div>
+      <div class="loading-text">條件已送出，請稍候，結果會回到 LINE 聊天室。</div>
+    </div>
+  </div>
 
-  <br><br>
-
-  <label>需求描述</label><br>
-  <input id="desc" placeholder="例如：熱水忽冷忽熱" />
-
-  <br><br><br>
-
-  <button onclick="submitForm()">開始搜尋</button>
+  <div class="toast" id="toast"></div>
 
   <script>
-    async function main() {
-      await liff.init({
-        liffId: "2009755622-kOEH6l5L"
+    const LIFF_ID = "YOUR_LIFF_ID";
+    const API_URL = "YOUR_API_URL";
+
+    const AREA_DATA = {
+      "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
+      "新北市": ["板橋區", "三重區", "中和區", "永和區", "新莊區", "新店區", "土城區", "蘆洲區", "樹林區", "汐止區", "鶯歌區", "三峽區", "淡水區", "瑞芳區", "五股區", "泰山區", "林口區", "深坑區", "石碇區", "坪林區", "三芝區", "石門區", "八里區", "平溪區", "雙溪區", "貢寮區", "金山區", "萬里區", "烏來區"],
+      "基隆市": ["仁愛區", "信義區", "中正區", "中山區", "安樂區", "暖暖區", "七堵區"],
+      "桃園市": ["桃園區", "中壢區", "平鎮區", "八德區", "楊梅區", "蘆竹區", "龜山區", "龍潭區", "大溪區", "大園區", "觀音區", "新屋區", "復興區"],
+      "新竹市": ["東區", "北區", "香山區"],
+      "新竹縣": ["竹北市", "竹東鎮", "新埔鎮", "關西鎮", "湖口鄉", "新豐鄉", "芎林鄉", "橫山鄉", "北埔鄉", "寶山鄉", "峨眉鄉", "尖石鄉", "五峰鄉"],
+      "苗栗縣": ["苗栗市", "苑裡鎮", "通霄鎮", "竹南鎮", "頭份市", "後龍鎮", "卓蘭鎮", "大湖鄉", "公館鄉", "銅鑼鄉", "南庄鄉", "頭屋鄉", "三義鄉", "西湖鄉", "造橋鄉", "三灣鄉", "獅潭鄉", "泰安鄉"],
+      "台中市": ["中區", "東區", "南區", "西區", "北區", "北屯區", "西屯區", "南屯區", "太平區", "大里區", "霧峰區", "烏日區", "豐原區", "后里區", "石岡區", "東勢區", "和平區", "新社區", "潭子區", "大雅區", "神岡區", "大肚區", "沙鹿區", "龍井區", "梧棲區", "清水區", "大甲區", "外埔區", "大安區"],
+      "彰化縣": ["彰化市", "鹿港鎮", "和美鎮", "線西鄉", "伸港鄉", "福興鄉", "秀水鄉", "花壇鄉", "芬園鄉", "員林市", "溪湖鎮", "田中鎮", "大村鄉", "埔鹽鄉", "埔心鄉", "永靖鄉", "社頭鄉", "二水鄉", "北斗鎮", "二林鎮", "田尾鄉", "埤頭鄉", "芳苑鄉", "大城鄉", "竹塘鄉", "溪州鄉"],
+      "南投縣": ["南投市", "埔里鎮", "草屯鎮", "竹山鎮", "集集鎮", "名間鄉", "鹿谷鄉", "中寮鄉", "魚池鄉", "國姓鄉", "水里鄉", "信義鄉", "仁愛鄉"],
+      "雲林縣": ["斗六市", "斗南鎮", "虎尾鎮", "西螺鎮", "土庫鎮", "北港鎮", "古坑鄉", "大埤鄉", "莿桐鄉", "林內鄉", "二崙鄉", "崙背鄉", "麥寮鄉", "東勢鄉", "褒忠鄉", "臺西鄉", "元長鄉", "四湖鄉", "口湖鄉", "水林鄉"],
+      "嘉義市": ["東區", "西區"],
+      "嘉義縣": ["太保市", "朴子市", "布袋鎮", "大林鎮", "民雄鄉", "溪口鄉", "新港鄉", "六腳鄉", "東石鄉", "義竹鄉", "鹿草鄉", "水上鄉", "中埔鄉", "竹崎鄉", "梅山鄉", "番路鄉", "大埔鄉", "阿里山鄉"],
+      "台南市": ["中西區", "東區", "南區", "北區", "安平區", "安南區", "永康區", "歸仁區", "新化區", "左鎮區", "玉井區", "楠西區", "南化區", "仁德區", "關廟區", "龍崎區", "官田區", "麻豆區", "佳里區", "西港區", "七股區", "將軍區", "學甲區", "北門區", "新營區", "後壁區", "白河區", "東山區", "六甲區", "下營區", "柳營區", "鹽水區", "善化區", "大內區", "山上區", "新市區", "安定區"],
+      "高雄市": ["楠梓區", "左營區", "鼓山區", "三民區", "鹽埕區", "前金區", "新興區", "苓雅區", "前鎮區", "旗津區", "小港區", "鳳山區", "林園區", "大寮區", "大樹區", "大社區", "仁武區", "鳥松區", "岡山區", "橋頭區", "燕巢區", "田寮區", "阿蓮區", "路竹區", "湖內區", "茄萣區", "永安區", "彌陀區", "梓官區", "旗山區", "美濃區", "六龜區", "甲仙區", "杉林區", "內門區", "茂林區", "桃源區", "那瑪夏區"],
+      "屏東縣": ["屏東市", "潮州鎮", "東港鎮", "恆春鎮", "萬丹鄉", "長治鄉", "麟洛鄉", "九如鄉", "里港鄉", "鹽埔鄉", "高樹鄉", "萬巒鄉", "內埔鄉", "竹田鄉", "新埤鄉", "枋寮鄉", "新園鄉", "崁頂鄉", "林邊鄉", "南州鄉", "佳冬鄉", "琉球鄉", "車城鄉", "滿州鄉", "枋山鄉", "三地門鄉", "霧臺鄉", "瑪家鄉", "泰武鄉", "來義鄉", "春日鄉", "獅子鄉", "牡丹鄉"],
+      "宜蘭縣": ["宜蘭市", "羅東鎮", "蘇澳鎮", "頭城鎮", "礁溪鄉", "壯圍鄉", "員山鄉", "冬山鄉", "五結鄉", "三星鄉", "大同鄉", "南澳鄉"],
+      "花蓮縣": ["花蓮市", "鳳林鎮", "玉里鎮", "新城鄉", "吉安鄉", "壽豐鄉", "光復鄉", "豐濱鄉", "瑞穗鄉", "富里鄉", "秀林鄉", "萬榮鄉", "卓溪鄉"],
+      "台東縣": ["臺東市", "成功鎮", "關山鎮", "卑南鄉", "鹿野鄉", "池上鄉", "東河鄉", "長濱鄉", "太麻里鄉", "大武鄉", "綠島鄉", "海端鄉", "延平鄉", "金峰鄉", "達仁鄉", "蘭嶼鄉"],
+      "澎湖縣": ["馬公市", "湖西鄉", "白沙鄉", "西嶼鄉", "望安鄉", "七美鄉"],
+      "金門縣": ["金城鎮", "金湖鎮", "金沙鎮", "金寧鄉", "烈嶼鄉", "烏坵鄉"],
+      "連江縣": ["南竿鄉", "北竿鄉", "莒光鄉", "東引鄉"]
+    };
+
+    const SERVICE_OPTIONS = [
+      "住宅水電",
+      "抓漏防水",
+      "熱水器",
+      "衛浴設備",
+      "管路工程",
+      "空調冷氣",
+      "家電設備",
+      "弱電工程",
+      "裝修工程",
+      "能源系統",
+      "工具材料"
+    ];
+
+    const citySelect = document.getElementById("city");
+    const districtSelect = document.getElementById("district");
+    const serviceSelect = document.getElementById("service");
+    const keywordInput = document.getElementById("keyword");
+    const descriptionInput = document.getElementById("description");
+    const resetBtn = document.getElementById("resetBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const loading = document.getElementById("loading");
+    const toast = document.getElementById("toast");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2400);
+    }
+
+    function setLoading(isLoading) {
+      loading.classList.toggle("show", isLoading);
+      submitBtn.disabled = isLoading;
+      resetBtn.disabled = isLoading;
+    }
+
+    function fillSelect(selectEl, options, placeholder) {
+      selectEl.innerHTML = "";
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = placeholder;
+      selectEl.appendChild(defaultOption);
+
+      options.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        selectEl.appendChild(option);
       });
     }
-    main();
 
-    async function submitForm() {
-      const userId = liff.getContext().userId;
-
-      const data = {
-        userId,
-        city: document.getElementById("city").value,
-        district: document.getElementById("district").value,
-        service: document.getElementById("service").value,
-        description: document.getElementById("desc").value
-      };
-
-      await fetch("http://localhost:3000/api/find-master", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
-
-      alert("已送出，請回 LINE 查看結果");
-      liff.closeWindow();
+    function initCityOptions() {
+      const cities = Object.keys(AREA_DATA);
+      fillSelect(citySelect, cities, "請選擇縣市");
     }
+
+    function initServiceOptions() {
+      fillSelect(serviceSelect, SERVICE_OPTIONS, "請選擇服務內容");
+    }
+
+    function updateDistrictOptions() {
+      const city = citySelect.value;
+      if (!city || !AREA_DATA[city]) {
+        districtSelect.disabled = true;
+        fillSelect(districtSelect, [], "請先選擇縣市");
+        return;
+      }
+
+      districtSelect.disabled = false;
+      fillSelect(districtSelect, AREA_DATA[city], "請選擇區域");
+    }
+
+    function resetForm() {
+      keywordInput.value = "";
+      descriptionInput.value = "";
+      citySelect.value = "";
+      serviceSelect.value = "";
+      districtSelect.disabled = true;
+      fillSelect(districtSelect, [], "請先選擇縣市");
+    }
+
+    async function initLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+      } catch (error) {
+        console.error("LIFF 初始化失敗：", error);
+        showToast("頁面初始化失敗，請稍後再試");
+      }
+    }
+
+    async function handleSubmit() {
+      const city = citySelect.value;
+      const district = districtSelect.value;
+      const service = serviceSelect.value;
+      const keyword = keywordInput.value.trim();
+      const description = descriptionInput.value.trim();
+
+      if (!city) {
+        showToast("請先選擇縣市");
+        return;
+      }
+
+      if (!district) {
+        showToast("請選擇區域");
+        return;
+      }
+
+      if (!service) {
+        showToast("請選擇服務內容");
+        return;
+      }
+
+      if (!liff.isInClient()) {
+        showToast("請從 LINE 內開啟此頁面");
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const context = liff.getContext();
+        const userId = context && context.userId;
+
+        if (!userId) {
+          throw new Error("無法取得 LINE 使用者資訊");
+        }
+
+        const finalDescription = [keyword, description].filter(Boolean).join("｜");
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            userId,
+            city,
+            district,
+            service,
+            description: finalDescription
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "搜尋失敗，請稍後再試");
+        }
+
+        showToast("條件已送出，請回 LINE 查看結果");
+        setTimeout(() => {
+          liff.closeWindow();
+        }, 700);
+      } catch (error) {
+        console.error("送出搜尋失敗：", error);
+        showToast(error.message || "送出失敗，請稍後再試");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    closeBtn.addEventListener("click", () => {
+      if (window.liff && liff.isInClient()) {
+        liff.closeWindow();
+      } else {
+        window.history.back();
+      }
+    });
+
+    citySelect.addEventListener("change", updateDistrictOptions);
+    resetBtn.addEventListener("click", resetForm);
+    submitBtn.addEventListener("click", handleSubmit);
+
+    initCityOptions();
+    initServiceOptions();
+    resetForm();
+    initLiff();
   </script>
-
 </body>
-
 </html>
