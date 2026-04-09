@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>找師傅</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body style="font-family:sans-serif; padding:20px">
+
+  <h2>找師傅</h2>
+
+  <label>縣市</label><br>
+  <select id="city">
+    <option value="台北市">台北市</option>
+    <option value="台中市">台中市</option>
+  </select>
+
+  <br><br>
+
+  <label>區域</label><br>
+  <input id="district" placeholder="例如：大同區" />
+
+  <br><br>
+
+  <label>服務</label><br>
+  <select id="service">
+    <option value="水電">水電</option>
+    <option value="熱水器">熱水器</option>
+  </select>
+
+  <br><br>
+
+  <label>需求描述</label><br>
+  <input id="desc" placeholder="例如：熱水忽冷忽熱" />
+
+  <br><br><br>
+
+  <button onclick="submitForm()">開始搜尋</button>
+
+  <script>
+    async function main() {
+      await liff.init({
+        liffId: "👉換成你的LIFF_ID"
+      });
+    }
+    main();
+
+    async function submitForm() {
+      const userId = liff.getContext().userId;
+
+      const data = {
+        userId,
+        city: document.getElementById("city").value,
+        district: document.getElementById("district").value,
+        service: document.getElementById("service").value,
+        description: document.getElementById("desc").value
+      };
+
+      await fetch("https://👉你的後端網址/api/find-master", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      alert("已送出，請回 LINE 查看結果");
+      liff.closeWindow();
+    }
+  </script>
+
+</body>
+
+</html>
