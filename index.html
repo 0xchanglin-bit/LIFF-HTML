@@ -42,7 +42,7 @@
   <script>
     async function main() {
       await liff.init({
-        liffId: "👉換成你的LIFF_ID"
+        liffId: "2009755622-kOEH6l5L"
       });
     }
     main();
@@ -58,7 +58,7 @@
         description: document.getElementById("desc").value
       };
 
-      await fetch("https://👉你的後端網址/api/find-master", {
+      await fetch("http://localhost:3000/api/find-master", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
