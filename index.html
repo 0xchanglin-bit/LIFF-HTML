@@ -459,7 +459,6 @@
 
   <script>
     const LIFF_ID = "2009755622-kOEH6l5L";
-    const API_URL = "https://subcranial-amira-strengtheningly.ngrok-free.dev/api/find-master";
 
     const AREA_DATA = {
       "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
@@ -581,75 +580,62 @@
     }
 
     async function handleSubmit() {
-      const city = citySelect.value;
-      const district = districtSelect.value;
-      const service = serviceSelect.value;
-      const keyword = keywordInput.value.trim();
-      const description = descriptionInput.value.trim();
+    const city = citySelect.value;
+    const district = districtSelect.value;
+    const service = serviceSelect.value;
+    const keyword = keywordInput.value.trim();
+    const description = descriptionInput.value.trim();
 
-      if (!city) {
-        showToast("請先選擇縣市");
-        return;
-      }
-
-      if (!district) {
-        showToast("請選擇區域");
-        return;
-      }
-
-      if (!service) {
-        showToast("請選擇服務內容");
-        return;
-      }
-
-      if (!liff.isInClient()) {
-        showToast("請從 LINE 內開啟此頁面");
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const context = liff.getContext();
-        const userId = context && context.userId;
-
-        if (!userId) {
-          throw new Error("無法取得 LINE 使用者資訊");
-        }
-
-        const finalDescription = [keyword, description].filter(Boolean).join("｜");
-
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            userId,
-            city,
-            district,
-            service,
-            description: finalDescription
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.message || "搜尋失敗，請稍後再試");
-        }
-
-        showToast("條件已送出，請回 LINE 查看結果");
-        setTimeout(() => {
-          liff.closeWindow();
-        }, 700);
-      } catch (error) {
-        console.error("送出搜尋失敗：", error);
-        showToast(error.message || "送出失敗，請稍後再試");
-      } finally {
-        setLoading(false);
-      }
+    if (!city) {
+      showToast("請先選擇縣市");
+      return;
     }
+
+    if (!district) {
+      showToast("請選擇區域");
+      return;
+    }
+
+    if (!service) {
+      showToast("請選擇服務內容");
+      return;
+    }
+
+    if (!liff.isInClient()) {
+      showToast("請從 LINE 內開啟此頁面");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const finalDescription = [keyword, description].filter(Boolean).join("｜");
+
+      const messageText =
+        `[搜尋師傅]` +
+        `/縣市=${city}` +
+        `/區域=${district}` +
+        `/服務=${service}` +
+        `/描述=${finalDescription}`;
+
+      await liff.sendMessages([
+        {
+          type: "text",
+          text: messageText,
+        },
+      ]);
+
+      showToast("條件已送出，正在回傳師傅名單");
+      setTimeout(() => {
+        liff.closeWindow();
+      }, 700);
+    } catch (error) {
+      console.error("送出搜尋失敗：", error);
+      showToast(error.message || "送出失敗，請稍後再試");
+    } finally {
+      setLoading(false);
+    }
+  }
 
     closeBtn.addEventListener("click", () => {
       if (window.liff && liff.isInClient()) {
