@@ -611,12 +611,13 @@
 
       const finalDescription = [keyword, description].filter(Boolean).join("｜");
 
-      const messageText =
-        `[搜尋師傅]` +
-        `/縣市=${city}` +
-        `/區域=${district}` +
-        `/服務=${service}` +
-        `/描述=${finalDescription}`;
+      let messageText = `[搜尋師傅]\n`;
+      messageText += `縣市：${city}/${district}\n`;
+      messageText += `服務：${service}`;
+      
+      if (finalDescription) {
+        messageText += `\n描述：${finalDescription}`;
+      }
 
       await liff.sendMessages([
         {
